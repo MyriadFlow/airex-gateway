@@ -1,0 +1,7 @@
+# ignore all env file
+*.env
+#ignore all file in collection
+collection/
+#ignore  that file
+log.json
+
