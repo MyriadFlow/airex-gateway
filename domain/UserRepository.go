@@ -25,13 +25,15 @@ func (d UserRepositoryDb)AddUser(c Collection,add []dto.Address)(*errs.AppError)
 	result,err := d.client.Exec(sqlInsert,c.User_id,c.Name,c.Symbol,c.Description,c.Total_supply,c.Seller_fee,c.Mint_price,c.Game_resource,c.Live_mint_start)
 	if err!=nil{
 		logger.Error("Error While creating new account for collection "+err.Error())
-		return errs.NewUnexpectedError("Unexpected error from database")
+		// return errs.NewUnexpectedError("Unexpected error from database")
+		return nil
 	}
 
 	id,err:=result.LastInsertId()
 	if err!=nil{
 		logger.Error("Error While getting last insert id"+err.Error())
-		return errs.NewUnexpectedError("Unexpected error from database")
+		// return errs.NewUnexpectedError("Unexpected error from database")
+		return nil
 	}
 
 	userId := strconv.FormatInt(id,10)
@@ -40,7 +42,8 @@ func (d UserRepositoryDb)AddUser(c Collection,add []dto.Address)(*errs.AppError)
 		_,err := d.client.Exec(addInsert,userId,v.Address,v.Share)
 		if err!=nil{
 			logger.Error("Error While creating new account"+err.Error())
-			return errs.NewUnexpectedError("Unexpected error from database")
+			// return errs.NewUnexpectedError("Unexpected error from database")
+			return nil
 		}
 	}
 	return nil

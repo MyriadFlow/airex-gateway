@@ -7,6 +7,8 @@ import (
 	"collection/logger"
 	"crypto/rand"
 	"encoding/json"
+
+	// "fmt"
 	"math/big"
 	"strconv"
 
@@ -17,18 +19,19 @@ import (
 )
 
 type UserService interface {
-	NewCollection(dto.CollectionRequest) (*domain.Collection, *errs.AppError)
+	NewCollection(dto.CollectionRequest) (*dto.JsonFile, *errs.AppError)
 }
 
 type DefaultUserService struct {
 	repo domain.UserRepositoryDb
 }
 
-func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*domain.Collection, *errs.AppError) {
+func (d DefaultUserService) NewCollection(req dto.CollectionRequest)(*dto.JsonFile, *errs.AppError) {
 	err:=req.ToValidate()
 	if err!=nil{
 		return nil,err
 	}
+	
 	a := domain.Collection{
 		User_id:         req.User_id,
 		Name:            req.Name,
@@ -42,7 +45,7 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*domain.Co
 	}
 
 	seller := req.Seller
-	err = d.repo.AddUser(a, seller)
+	d.repo.AddUser(a, seller)
 
 	//Asset File Making by id
 	var firstAddress string
@@ -51,7 +54,7 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*domain.Co
 		break
 	}
 
-	c := dto.JsonFile{
+	c := &dto.JsonFile{
 		Price:                uint32(req.Mint_price),
 		Number:               int(req.Total_supply),
 		SolTreasuryAccount:   firstAddress,
@@ -136,14 +139,10 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*domain.Co
 		f, _ := json.MarshalIndent(e, " ", " ")
 		jso.Write(f)
 		imgPath := configFilePath+"/"+strconv.Itoa(i)+".png"
-		// img, error := os.OpenFile(imgPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		// if error != nil {
-		// 	return nil, errs.NewStatusInternalServerError("file is not opening")
-		// }
 		dec:= dto.Load("dto/hdpng/pacman.png")
 		dto.Save(imgPath,dec)
 	}
-	return nil, err
+	return c, err
 }
 
 func NewUserService(repository domain.UserRepositoryDb) DefaultUserService {
