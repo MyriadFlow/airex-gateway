@@ -1,0 +1,43 @@
+{
+  "Name": "testing",
+  "Symbol": "tes",
+  "Description": "checking data",
+  "Seller_fee_basis_points": 256,
+  "Image": "ipfs://QmUehLuw9dBC1u8xqrWExsb62wGYdYoqb4vnwfeyEQiwNz",
+  "Animation_url": "ipfs://jdgckjasdgf64565465465/?uniqueParam=226247039430600099520594363347953429254",
+  "Attribute": [
+   {
+    "Trait_type": "Developers",
+    "Value": "1337 Gamers"
+   },
+   {
+    "Trait_type": "Category",
+    "Value": "Game"
+   },
+   {
+    "Trait_type": "License",
+    "Value": "MIT License"
+   }
+  ],
+  "Properties": {
+   "File": {
+    "Uri": "0.png",
+    "Type": "image/png"
+   },
+   "Category": "image",
+   "Creators": [
+    {
+     "address": "dchgihgdas1654",
+     "share": 20
+    },
+    {
+     "address": "dchgihgdas165465464",
+     "share": 20
+    },
+    {
+     "address": "dchgihgdas1654654665464",
+     "share": 20
+    }
+   ]
+  }
+ }

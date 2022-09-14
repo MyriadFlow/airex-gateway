@@ -5,20 +5,26 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"log"
 
-	"github.com/eth/domain"
-	"github.com/eth/errs"
-	"github.com/eth/logger"
-	"github.com/eth/service"
+	_ "github.com/lib/pq"
+
+	"collection/domain"
+	"collection/logger"
+	"collection/service"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/ethereum/go-ethereum/ethclient"
+	
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
-var infuraUrl = "https://mainnet.infura.io/v3/977ca2d19b68405885d4aafbc40ad7d6"
-
 func Start(){
+	err := godotenv.Load("local.env")
+	if err != nil {
+		log.Fatalf("Some error occured. Err: %s", err)
+	}
+
 	r :=mux.NewRouter()
 
 	dbClient := getDbClient()
@@ -26,17 +32,12 @@ func Start(){
 	newRepositoryDb := domain.NewUserRepositoryDb(dbClient)
 	us := UserHandler{service.NewUserService(newRepositoryDb)}
 	
-	r.HandleFunc("/createWallet",us.register)
-	http.ListenAndServe("localhost:8003",r)
-}
+	r.HandleFunc("/collections",us.CreateCollection).Methods("Post")
 
-func EthClient()*ethclient.Client{
-	client,err:=ethclient.Dial(infuraUrl)
-	if err != nil{
-		errs.NewUnexpectedError("Ether Client Not Created")
-	}
-	defer client.Close()
-	return client
+	address := os.Getenv("SERVER_ADDRESS")
+	port := os.Getenv("SERVER_PORT")
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", address, port), r))
+	
 }
 
 func getDbClient() *sqlx.DB{
@@ -47,7 +48,7 @@ func getDbClient() *sqlx.DB{
 	dbName := os.Getenv("DB_NAME")
 	db:= os.Getenv("DB")
 
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPasswd, dbAddr, dbPort, dbName)
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?sslmode=disable", dbUser, dbPasswd, dbAddr, dbPort, dbName)
 
 	client, err := sqlx.Open(db, dataSource)
 	if err != nil {

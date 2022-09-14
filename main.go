@@ -1,6 +1,8 @@
 package main
 
-import "github.com/eth/app"
+import(
+	"collection/app"
+)
 
 func main(){
 	app.Start()
