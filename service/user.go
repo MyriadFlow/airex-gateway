@@ -26,12 +26,12 @@ type DefaultUserService struct {
 	repo domain.UserRepositoryDb
 }
 
-func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*dto.JsonFile, *errs.AppError) {
-	err := req.ToValidate()
-	if err != nil {
-		return nil, err
+func (d DefaultUserService) NewCollection(req dto.CollectionRequest)(*dto.JsonFile, *errs.AppError) {
+	err:=req.ToValidate()
+	if err!=nil{
+		return nil,err
 	}
-
+	
 	a := domain.Collection{
 		User_id:         req.User_id,
 		Name:            req.Name,
@@ -71,23 +71,24 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*dto.JsonF
 	filepath := assetPath + "/" + filename
 	handle := os.Mkdir(filepath, os.ModePerm)
 	if handle != nil {
-		logger.Error("config is not cretaing new directory", zap.Error(handle))
+		logger.Error("config is not cretaing new directory",zap.Error(handle))
 		return nil, errs.NewStatusInternalServerError("file is not opening")
 	}
 	con := filepath + "/" + "config.json"
 	asset, error := os.OpenFile(con, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if error != nil {
-		logger.Error("Assset File is not opening", zap.Error(error))
+		logger.Error("Assset File is not opening",zap.Error(error))
 		return nil, errs.NewStatusInternalServerError("file is not opening")
 	}
 
 	b, _ := json.MarshalIndent(c, " ", " ")
 	asset.Write(b)
 
+	
 	configFilePath := filepath + "/" + "Asset"
 	error = os.Mkdir(configFilePath, os.ModePerm)
 	if error != nil {
-		logger.Error("config is not cretaing new directory", zap.Error(error))
+		logger.Error("config is not cretaing new directory",zap.Error(error))
 		return nil, errs.NewStatusInternalServerError("file is not opening")
 	}
 
@@ -129,17 +130,17 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*dto.JsonF
 				Creators: req.Seller,
 			},
 		}
-		jsoPath := configFilePath + "/" + strconv.Itoa(i) + ".json"
+		jsoPath := configFilePath+"/"+strconv.Itoa(i)+".json"
 		jso, error := os.OpenFile(jsoPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if error != nil {
-			logger.Error("json File is not opening", zap.Error(error))
+			logger.Error("json File is not opening",zap.Error(error))
 			return nil, errs.NewStatusInternalServerError("file is not opening")
 		}
 		f, _ := json.MarshalIndent(e, " ", " ")
 		jso.Write(f)
-		imgPath := configFilePath + "/" + strconv.Itoa(i) + ".png"
-		dec := dto.Load("dto/hdpng/pacman.png")
-		dto.Save(imgPath, dec)
+		imgPath := configFilePath+"/"+strconv.Itoa(i)+".png"
+		dec:= dto.Load("dto/hdpng/pacman.png")
+		dto.Save(imgPath,dec)
 	}
 	return c, err
 }
