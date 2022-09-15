@@ -2,65 +2,76 @@ package app
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"time"
-	"log"
 
-	_ "github.com/lib/pq"
+	"gorm.io/gorm"
 
+	"collection/config/envconfig"
 	"collection/domain"
+	"collection/dto"
 	"collection/logger"
 	"collection/service"
-	"github.com/jmoiron/sqlx"
 
-	
+	"gorm.io/driver/postgres"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
-func Start(){
-	err := godotenv.Load("local.env")
-	if err != nil {
-		log.Fatalf("Some error occured. Err: %s", err)
-	}
+func Start() {
+	envconfig.InitEnvVars()
 
-	r :=mux.NewRouter()
+	r := mux.NewRouter()
 
 	dbClient := getDbClient()
 	//wiring
-	newRepositoryDb := domain.NewUserRepositoryDb(dbClient)
+	newRepositoryDb := domain.NewUserRepositoryDb(dbClient.Model(&dto.User{}))
 	us := UserHandler{service.NewUserService(newRepositoryDb)}
-	
-	r.HandleFunc("/collections",us.CreateCollection).Methods("Post")
 
-	address := os.Getenv("SERVER_ADDRESS")
-	port := os.Getenv("SERVER_PORT")
-	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", address, port), r))
-	
+	r.HandleFunc("/collections", us.CreateCollection).Methods("Post")
+	ginApp := gin.Default()
+
+	corsM := cors.New(cors.Config{AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
+		AllowOrigins:     envconfig.EnvVars.ALLOWED_ORIGIN})
+	ginApp.Use(corsM)
+	// api.ApplyRoutes(ginApp)
+	port := envconfig.EnvVars.APP_PORT
+	err := ginApp.Run(fmt.Sprintf(":%d", port))
+	if err != nil {
+		logger.Fatalf("failed to serve app on port %s: %s", port, err)
+	}
+
 }
 
-func getDbClient() *sqlx.DB{
+func getDbClient() *gorm.DB {
 	dbUser := os.Getenv("DB_USER")
 	dbPasswd := os.Getenv("DB_PASSWD")
-	dbAddr := os.Getenv("DB_ADDR")
+	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
-	db:= os.Getenv("DB")
-
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?sslmode=disable", dbUser, dbPasswd, dbAddr, dbPort, dbName)
-
-	client, err := sqlx.Open(db, dataSource)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable port=%s",
+		dbHost, dbUser, dbPasswd, dbName, dbPort)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic(err)
+		logger.Fatalf("failed to connect to database: %s", err)
 	}
-	// See "Important settings" section.
-	client.SetConnMaxLifetime(time.Minute * 10)
-	client.SetMaxOpenConns(10)
-	client.SetMaxIdleConns(10)
+
+	// Get underlying sql database to ping it
+	sqlDb, err := db.DB()
+	if err != nil {
+		logger.Fatalf("failed to ping database: %s", err)
+	}
+
+	// If ping fails then log error and exit
+	if err = sqlDb.Ping(); err != nil {
+		logger.Fatalf("failed to ping database: %s", err)
+	}
 
 	logger.Info("Database is Connected")
-	return client
+	return db
 }
-
-
