@@ -16,21 +16,22 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/mux"
+	// "github.com/gorilla/mux"
 )
 
 func Start() {
 	envconfig.InitEnvVars()
 
-	r := mux.NewRouter()
+	// r := mux.NewRouter()
 
 	dbClient := getDbClient()
 	//wiring
 	newRepositoryDb := domain.NewUserRepositoryDb(dbClient.Model(&dto.User{}))
 	us := UserHandler{service.NewUserService(newRepositoryDb)}
 
-	r.HandleFunc("/collections", us.CreateCollection).Methods("Post")
+	// r.HandleFunc("/collections", us.CreateCollection).Methods("Post")
 	ginApp := gin.Default()
+	ginApp.POST("/collection",us.CreateCollection)
 
 	corsM := cors.New(cors.Config{AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},

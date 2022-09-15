@@ -7,7 +7,7 @@ import (
 )
 
 type Collection struct {
-	User_id         string  `db:"user_id"`
+	Collection_id   string  `db:"user_id"`
 	Name            string  `db:"name"`
 	Symbol          string  `db:"symbol"`
 	Description     string  `db:"description"`
@@ -19,12 +19,20 @@ type Collection struct {
 }
 
 type Seller struct {
-	User_id string `db:"user_id"`
-	Address string `db:"address"`
-	Share   int    `db:"share"`
+	Collection_id  string `db:"user_id"`
+	Wallet_Address string `db:"address"`
+	Share          int    `db:"share"`
 }
 
-type UserRepository interface{
-	AddUser(c Collection,add []dto.Address)(*errs.AppError)
+type User struct {
+	WalletAddress string       `gorm:"primary_key" json:"walletAddress"`
+	FlowIds       []dto.FlowId `gorm:"foreignkey:WalletAddress" json:"-"`
 }
+
+
+
+type UserRepository interface {
+	AddCollection(c Collection, add []dto.Address) *errs.AppError
+}
+
 // func (a Collection)ToNewCollectionResponseDto()

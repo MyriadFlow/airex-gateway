@@ -34,7 +34,7 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*dto.JsonF
 	}
 
 	a := domain.Collection{
-		User_id:         req.User_id,
+		Collection_id:   req.Collection_id,
 		Name:            req.Name,
 		Symbol:          req.Symbol,
 		Description:     req.Description,
@@ -46,7 +46,7 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*dto.JsonF
 	}
 
 	seller := req.Seller
-	d.repo.AddUser(a, seller)
+	d.repo.AddCollection(a, seller)
 
 	//Asset File Making by id
 	var firstAddress string
@@ -68,7 +68,7 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*dto.JsonF
 	}
 
 	assetPath := envconfig.EnvVars.COLLECTION_PATH
-	filename := req.User_id
+	filename := req.Collection_id
 	filepath := assetPath + "/" + filename
 	handle := os.Mkdir(filepath, os.ModePerm)
 	if handle != nil {
