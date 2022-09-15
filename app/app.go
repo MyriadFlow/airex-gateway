@@ -71,6 +71,10 @@ func getDbClient() *gorm.DB {
 		logger.Fatalf("failed to ping database: %s", err)
 	}
 
+	err = db.AutoMigrate(&domain.Collection{}, &domain.Seller{}, &dto.FlowId{})
+	if err != nil {
+		logger.Fatalf("Auto migration failed: %s", err)
+	}
 	logger.Info("Database is Connected")
 	return db
 }
