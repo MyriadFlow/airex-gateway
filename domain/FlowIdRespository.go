@@ -10,11 +10,11 @@ import (
 )
 
 type FlowIdRepositoryDb struct {
-	client *gorm.DB
+	Client *gorm.DB
 }
 
 func (i *FlowIdRepositoryDb) GetFlowId(flowId string) (*dto.FlowId, error) {
-	db := i.client
+	db := i.Client
 	var userFlowId dto.FlowId
 	res := db.Find(&userFlowId, &dto.FlowId{
 		FlowId: flowId,
@@ -32,7 +32,7 @@ func (i *FlowIdRepositoryDb) GetFlowId(flowId string) (*dto.FlowId, error) {
 
 // Adds flow id into database for given wallet Address
 func (i *FlowIdRepositoryDb) AddFlowId(walletAddr string, flowId string) error {
-	db := i.client
+	db := i.Client
 	err := db.Create(&dto.FlowId{
 		WalletAddress: walletAddr,
 		FlowId:        flowId,
@@ -42,7 +42,7 @@ func (i *FlowIdRepositoryDb) AddFlowId(walletAddr string, flowId string) error {
 }
 
 func (i *FlowIdRepositoryDb) DeleteFlowId(flowId string) error {
-	db := i.client
+	db := i.Client
 	err := db.Delete(&dto.FlowId{
 		FlowId: flowId,
 	}).Error
