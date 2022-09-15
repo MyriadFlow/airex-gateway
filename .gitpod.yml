@@ -1,6 +1,8 @@
 image:
   file: .gitpod/Dockerfile
 tasks:
+  - name: Set solana wallet
+    command: echo $SOLANA_KEY | base64 -d  > /home/gitpod/.config/solana/id.json && solana airdrop 2 && exit
   - name: golang live
     env:
       PASETO_PRIVATE_KEY: abckey
@@ -34,6 +36,7 @@ tasks:
     command: |
       gp sync-await db
       docker exec -it airex_gateway psql -U airex_gateway
+         
 vscode:
   extensions:
     - golang.go
