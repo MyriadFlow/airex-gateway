@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"gorm.io/gorm"
@@ -49,12 +48,12 @@ func Start() {
 }
 
 func getDbClient() *gorm.DB {
-	dbUser := os.Getenv("DB_USER")
-	dbPasswd := os.Getenv("DB_PASSWD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable port=%s",
+	dbUser := envconfig.EnvVars.DB_USERNAME
+	dbPasswd := envconfig.EnvVars.DB_PASSWORD
+	dbHost := envconfig.EnvVars.DB_HOST
+	dbPort := envconfig.EnvVars.DB_PORT
+	dbName := envconfig.EnvVars.DB_NAME
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable port=%d",
 		dbHost, dbUser, dbPasswd, dbName, dbPort)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

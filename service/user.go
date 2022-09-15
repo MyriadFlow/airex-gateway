@@ -1,6 +1,7 @@
 package service
 
 import (
+	"collection/config/envconfig"
 	"collection/domain"
 	"collection/dto"
 	"collection/errs"
@@ -66,7 +67,7 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*dto.JsonF
 		SellerFeeBasisPoints: req.Seller_fee,
 	}
 
-	assetPath := os.Getenv("COLLECTION_PATH")
+	assetPath := envconfig.EnvVars.COLLECTION_PATH
 	filename := req.User_id
 	filepath := assetPath + "/" + filename
 	handle := os.Mkdir(filepath, os.ModePerm)
