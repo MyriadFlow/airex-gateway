@@ -12,8 +12,8 @@ type Collection struct {
 	Symbol        string
 	Description   string
 	TotalSupply   uint32
-	SellerFee     uint32
-	MintPrice     float32
+	SellerFee     uint64
+	MintPrice     float64
 	GameResource  string
 	LiveMintStart string
 	Sellers       []User `gorm:"many2many:collection_sellers;"`

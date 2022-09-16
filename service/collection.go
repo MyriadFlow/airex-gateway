@@ -56,7 +56,7 @@ func (d DefaultCollectionService) NewCollection(req dto.CollectionRequest) (*dto
 	}
 
 	c := &dto.JsonFile{
-		Price:                uint32(req.Mint_price),
+		Price:                req.Mint_price,
 		Number:               int(req.Total_supply),
 		SolTreasuryAccount:   firstAddress,
 		Creators:             seller,
@@ -85,7 +85,7 @@ func (d DefaultCollectionService) NewCollection(req dto.CollectionRequest) (*dto
 	b, _ := json.MarshalIndent(c, " ", " ")
 	asset.Write(b)
 
-	configFilePath := filepath + "/" + "Asset"
+	configFilePath := filepath + "/" + "assets"
 	error = os.Mkdir(configFilePath, os.ModePerm)
 	if error != nil {
 		logger.Error("config is not cretaing new directory", zap.Error(error))
@@ -101,31 +101,31 @@ func (d DefaultCollectionService) NewCollection(req dto.CollectionRequest) (*dto
 	for i := 0; i < int(req.Total_supply); i++ {
 
 		e := dto.Config{
-			Name:                    req.Name,
-			Symbol:                  req.Symbol,
-			Description:             req.Description,
-			Seller_fee_basis_points: req.Seller_fee,
-			Image:                   "ipfs://QmUehLuw9dBC1u8xqrWExsb62wGYdYoqb4vnwfeyEQiwNz",
-			Animation_url:           Animate,
-			Attribute: []dto.Attribute{
+			Name:                 req.Name,
+			Symbol:               req.Symbol,
+			Description:          req.Description,
+			SellerFeeBasisPoints: req.Seller_fee,
+			Image:                "ipfs://QmUehLuw9dBC1u8xqrWExsb62wGYdYoqb4vnwfeyEQiwNz",
+			AnimationUrl:         Animate,
+			Attributes: []dto.Attribute{
 				{
-					Trait_type: "Developers",
-					Value:      "1337 Gamers",
+					TraitType: "Developers",
+					Value:     "1337 Gamers",
 				},
 				{
-					Trait_type: "Category",
-					Value:      "Game",
+					TraitType: "Category",
+					Value:     "Game",
 				},
 				{
-					Trait_type: "License",
-					Value:      "MIT License",
+					TraitType: "License",
+					Value:     "MIT License",
 				},
 			},
 			Properties: dto.Properties{
-				File: dto.File{
-					Uri:  strconv.Itoa(i) + ".png",
+				Files: []dto.File{{
+					URI:  strconv.Itoa(i) + ".png",
 					Type: "image/png",
-				},
+				}},
 				Category: "image",
 				Creators: req.Seller,
 			},
