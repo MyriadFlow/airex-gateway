@@ -6,6 +6,7 @@ import (
 	"collection/logger"
 	"collection/service"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/TheLazarusNetwork/go-helpers/httpo"
@@ -14,6 +15,7 @@ import (
 )
 
 func (u FlowIdHandler) Authenticate(c *gin.Context) {
+	//TODO check network
 	var req dtoapis.AuthenticateRequest
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -39,6 +41,9 @@ func (u FlowIdHandler) Authenticate(c *gin.Context) {
 			return
 		}
 
+		log.Printf("failed to verify and get paseto: %s", err)
+
+		logger.Errorf("failed to verify and get paseto: %s", err)
 		// If unexpected error
 		httpo.NewErrorResponse(500, "failed to verify and get paseto").Send(c, 500)
 		return

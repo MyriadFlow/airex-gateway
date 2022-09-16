@@ -29,13 +29,16 @@ func Start() {
 	dbClient := getDbClient()
 
 	//wiring
-	newRepositoryDb := domain.NewCollectionRepositoryDb(dbClient.Model(&dto.User{}))
+	newCollectionRepositoryDb := domain.NewCollectionRepositoryDb(dbClient)
+	flowIdRepo := domain.NewFlowIdRepositoryDb(dbClient)
+	userRepo := domain.NewUserRepositoryDb(dbClient)
+	us := CollectionHandler{service.NewCollectionService(newCollectionRepositoryDb)}
 
-	us := CollectionHandler{service.NewCollectionService(newRepositoryDb)}
-
-	// r.HandleFunc("/collections", us.CreateCollection).Methods("Post")
+	flowIdHandler := FlowIdHandler{service.NewFlowIdService(flowIdRepo, userRepo)}
 	ginApp := gin.Default()
 	ginApp.POST("/collection", us.CreateCollection)
+	ginApp.GET("/flowid", flowIdHandler.GetFlowId)
+	ginApp.POST("/authenticate", flowIdHandler.Authenticate)
 
 	corsM := cors.New(cors.Config{AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},

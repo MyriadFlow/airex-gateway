@@ -18,7 +18,6 @@ func (i *FlowIdRepositoryDb) GetFlowId(flowId string) (*dto.FlowId, error) {
 	res := db.Find(&userFlowId, &dto.FlowId{
 		FlowId: flowId,
 	})
-
 	if err := res.Error; err != nil {
 		return nil, err
 	}

@@ -3,6 +3,7 @@ package service
 import (
 	"collection/config/envconfig"
 	"collection/domain"
+	"collection/internal/pkg/errorso"
 	"collection/internal/pkg/paseto"
 	"errors"
 	"fmt"
@@ -12,7 +13,8 @@ import (
 )
 
 type DefaultFlowIdService struct {
-	repo domain.FlowIdRepositoryDb
+	flowIdRepo domain.FlowIdRepositoryDb
+	userRepo   domain.UserRepositoryDb
 }
 
 var ErrSignDenied = errors.New("signature denied")
@@ -20,23 +22,22 @@ var ErrSignDenied = errors.New("signature denied")
 // Create and insert flow Id into the database and return it
 func (i *DefaultFlowIdService) CreateFlowId(walletAddress string) (string, error) {
 
-	//TODO: Get Wallet address from user repo
 	//Check if user exist
-	// _, err := i.repo.Get(walletAddress)
-	// if err != nil {
-	// 	if errors.Is(err, errorso.ErrRecordNotFound) {
-	// 		//If doesn't exist then add that
-	// 		err = user.Add(walletAddress)
-	// 		if err != nil {
-	// 			return "", fmt.Errorf("failed to add user: %w", err)
-	// 		}
-	// 	} else {
-	// 		return "", fmt.Errorf("failed to check if user exist: %w", err)
-	// 	}
-	// }
+	_, err := i.userRepo.Get(walletAddress)
+	if err != nil {
+		if errors.Is(err, errorso.ErrRecordNotFound) {
+			//If doesn't exist then add that
+			err = i.userRepo.Add(walletAddress)
+			if err != nil {
+				return "", fmt.Errorf("failed to add user: %w", err)
+			}
+		} else {
+			return "", fmt.Errorf("failed to check if user exist: %w", err)
+		}
+	}
 
 	flowIdString := uuid.NewString()
-	err := i.repo.AddFlowId(walletAddress, flowIdString)
+	err = i.flowIdRepo.AddFlowId(walletAddress, flowIdString)
 	if err != nil {
 		return "", fmt.Errorf("failed to add flowId into database: %w", err)
 	}
@@ -47,7 +48,7 @@ func (i *DefaultFlowIdService) CreateFlowId(walletAddress string) (string, error
 // VerifySignAndGetPaseto verifies the signature for given flowID and returns paseto if it is valid
 // Also deletes the flow id after approving signature
 func (i *DefaultFlowIdService) VerifySignAndGetPaseto(signatureHex string, flowId string) (string, error) {
-	dataFlowId, err := i.repo.GetFlowId(flowId)
+	dataFlowId, err := i.flowIdRepo.GetFlowId(flowId)
 	if err != nil {
 		return "", fmt.Errorf("failed to get flow id from database: %w", err)
 	}
@@ -72,14 +73,18 @@ func (i *DefaultFlowIdService) VerifySignAndGetPaseto(signatureHex string, flowI
 		return "", ErrSignDenied
 	}
 
-	paseto, err := paseto.GetPasetoForUser(i.repo.Client, dataFlowId.WalletAddress)
+	paseto, err := paseto.GetPasetoForUser(i.flowIdRepo.Client, dataFlowId.WalletAddress)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate paseto: %w", err)
 	}
 
-	err = i.repo.DeleteFlowId(flowId)
+	err = i.flowIdRepo.DeleteFlowId(flowId)
 	if err != nil {
 		return "", fmt.Errorf("failed to delete flowid: %w", err)
 	}
 	return paseto, nil
+}
+
+func NewFlowIdService(flowIdRepo domain.FlowIdRepositoryDb, userRepo domain.UserRepositoryDb) DefaultFlowIdService {
+	return DefaultFlowIdService{flowIdRepo, userRepo}
 }

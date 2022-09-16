@@ -9,40 +9,34 @@ import (
 	"gorm.io/gorm"
 )
 
-type CustomClaimsWrapper struct {
-	Db *gorm.DB
-	Cc CustomClaims
-}
-
 // CustomClaims defines claims for paseto containing wallet address, signed by and RegisteredClaims
 type CustomClaims struct {
 	WalletAddress string `json:"walletAddress"`
 	SignedBy      string `json:"signedBy"`
 	pvx.RegisteredClaims
+	Db *gorm.DB `json:"-"`
 }
 
 // Valid checks if the claims are valid agaist RegisteredClaims and checks if wallet address
 // exist in database
-func (c CustomClaimsWrapper) Valid() error {
+func (c CustomClaims) Valid() error {
 	db := c.Db
-	if err := c.Cc.RegisteredClaims.Valid(); err != nil {
+	if err := c.RegisteredClaims.Valid(); err != nil {
 		return err
 	}
-	err := db.Model(&user.User{}).Where("wallet_address = ?", c.Cc.WalletAddress).First(&user.User{}).Error
+	err := db.Model(&user.User{}).Where("wallet_address = ?", c.WalletAddress).First(&user.User{}).Error
 	return err
 }
 
 // New returns CustomClaims with wallet address, signed by and expiration
-func New(db *gorm.DB, walletAddress string, expiration time.Duration, signedBy string) CustomClaimsWrapper {
+func New(db *gorm.DB, walletAddress string, expiration time.Duration, signedBy string) CustomClaims {
 	expirationTime := time.Now().Add(expiration)
-	return CustomClaimsWrapper{
-		Db: db,
-		Cc: CustomClaims{
-			walletAddress,
-			signedBy,
-			pvx.RegisteredClaims{
-				Expiration: &expirationTime,
-			},
+	return CustomClaims{
+		walletAddress,
+		signedBy,
+		pvx.RegisteredClaims{
+			Expiration: &expirationTime,
 		},
+		db,
 	}
 }

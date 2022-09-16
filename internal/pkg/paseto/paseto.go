@@ -19,7 +19,7 @@ func GetPasetoForUser(db *gorm.DB, walletAddr string) (string, error) {
 	privateKey := envconfig.EnvVars.PASETO_PRIVATE_KEY
 	symK := pvx.NewSymmetricKey([]byte(privateKey), pvx.Version4)
 	pv4 := pvx.NewPV4Local()
-	tokenString, err := pv4.Encrypt(symK, customClaims)
+	tokenString, err := pv4.Encrypt(symK, &customClaims)
 	if err != nil {
 		return "", err
 	}
