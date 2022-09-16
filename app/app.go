@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"gorm.io/gorm"
@@ -20,18 +21,21 @@ import (
 )
 
 func Start() {
+
 	envconfig.InitEnvVars()
 
 	// r := mux.NewRouter()
 
 	dbClient := getDbClient()
+
 	//wiring
-	newRepositoryDb := domain.NewUserRepositoryDb(dbClient.Model(&dto.User{}))
-	us := UserHandler{service.NewUserService(newRepositoryDb)}
+	newRepositoryDb := domain.NewCollectionRepositoryDb(dbClient.Model(&dto.User{}))
+
+	us := CollectionHandler{service.NewCollectionService(newRepositoryDb)}
 
 	// r.HandleFunc("/collections", us.CreateCollection).Methods("Post")
 	ginApp := gin.Default()
-	ginApp.POST("/collection",us.CreateCollection)
+	ginApp.POST("/collection", us.CreateCollection)
 
 	corsM := cors.New(cors.Config{AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
@@ -72,9 +76,18 @@ func getDbClient() *gorm.DB {
 		logger.Fatalf("failed to ping database: %s", err)
 	}
 
-	err = db.AutoMigrate(&domain.Collection{}, &domain.Seller{}, &dto.FlowId{})
+	err = db.AutoMigrate(&domain.User{}, &domain.Collection{}, &dto.FlowId{})
 	if err != nil {
 		logger.Fatalf("Auto migration failed: %s", err)
+	}
+
+	err = db.SetupJoinTable(&domain.Collection{}, "Sellers", &domain.CollectionSeller{})
+	if err != nil {
+		log.Fatalf("Auto migration failed: %s", err)
+	}
+	err = db.AutoMigrate(&domain.CollectionSeller{})
+	if err != nil {
+		log.Fatalf("Auto migration failed: %s", err)
 	}
 	logger.Info("Database is Connected")
 	return db

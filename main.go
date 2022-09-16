@@ -1,9 +1,9 @@
 package main
 
-import(
+import (
 	"collection/app"
 )
 
-func main(){
+func main() {
 	app.Start()
 }

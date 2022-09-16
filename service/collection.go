@@ -19,30 +19,30 @@ import (
 	"go.uber.org/zap"
 )
 
-type UserService interface {
+type CollectionService interface {
 	NewCollection(dto.CollectionRequest) (*dto.JsonFile, *errs.AppError)
 }
 
-type DefaultUserService struct {
-	repo domain.UserRepositoryDb
+type DefaultCollectionService struct {
+	repo domain.CollectionRepositoryDb
 }
 
-func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*dto.JsonFile, *errs.AppError) {
+func (d DefaultCollectionService) NewCollection(req dto.CollectionRequest) (*dto.JsonFile, *errs.AppError) {
 	err := req.ToValidate()
 	if err != nil {
 		return nil, err
 	}
 
 	a := domain.Collection{
-		Collection_id:   req.Collection_id,
-		Name:            req.Name,
-		Symbol:          req.Symbol,
-		Description:     req.Description,
-		Total_supply:    req.Total_supply,
-		Seller_fee:      req.Seller_fee,
-		Mint_price:      req.Mint_price,
-		Game_resource:   req.Game_resource,
-		Live_mint_start: req.Live_mint_start,
+		Id:            req.Id,
+		Name:          req.Name,
+		Symbol:        req.Symbol,
+		Description:   req.Description,
+		TotalSupply:   req.Total_supply,
+		SellerFee:     req.Seller_fee,
+		MintPrice:     req.Mint_price,
+		GameResource:  req.Game_resource,
+		LiveMintStart: req.Live_mint_start,
 	}
 
 	seller := req.Seller
@@ -68,7 +68,7 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*dto.JsonF
 	}
 
 	assetPath := envconfig.EnvVars.COLLECTION_PATH
-	filename := req.Collection_id
+	filename := req.Id
 	filepath := assetPath + "/" + filename
 	handle := os.Mkdir(filepath, os.ModePerm)
 	if handle != nil {
@@ -145,6 +145,6 @@ func (d DefaultUserService) NewCollection(req dto.CollectionRequest) (*dto.JsonF
 	return c, err
 }
 
-func NewUserService(repository domain.UserRepositoryDb) DefaultUserService {
-	return DefaultUserService{repository}
+func NewCollectionService(repository domain.CollectionRepositoryDb) DefaultCollectionService {
+	return DefaultCollectionService{repository}
 }

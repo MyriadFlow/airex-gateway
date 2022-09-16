@@ -4,7 +4,6 @@ import (
 	"collection/dto"
 	"collection/internal/pkg/errorso"
 
-	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 	// _ "github.com/go-sql-driver/mysql"
 )

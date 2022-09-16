@@ -30,6 +30,7 @@ tasks:
       sleep 12
       gp sync-done db
       cp .env-sample .env
+      mkdir collection
       air
   
   - name: postgres shell

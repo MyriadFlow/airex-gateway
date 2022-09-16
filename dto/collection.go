@@ -8,7 +8,7 @@ import (
 )
 
 type CollectionRequest struct {
-	Collection_id         string    `json:"user_id"`
+	Id              string    `json:"user_id"`
 	Name            string    `json:"name"`
 	Symbol          string    `json:"symbol"`
 	Description     string    `json:"description"`

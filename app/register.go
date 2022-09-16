@@ -3,6 +3,7 @@ package app
 import (
 	"collection/dto"
 	"collection/service"
+
 	// "encoding/json"
 	"net/http"
 
@@ -11,31 +12,31 @@ import (
 	"github.com/google/uuid"
 )
 
-type UserHandler struct {
-	service service.UserService
+type CollectionHandler struct {
+	service service.CollectionService
 }
 
-func (u UserHandler) CreateCollection(c *gin.Context) {
+func (u CollectionHandler) CreateCollection(c *gin.Context) {
 	var collection *dto.JsonFile
 	id := uuid.New()
 	var request dto.CollectionRequest
-	
+
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest,err.Error())
+		c.JSON(http.StatusBadRequest, err.Error())
 		return
-	}	
-	request.Collection_id = id.String()
+	}
+	request.Id = id.String()
 	collection, appError := u.service.NewCollection(request)
 	if appError != nil {
-		c.JSON(appError.Code,appError.Message)
+		c.JSON(appError.Code, appError.Message)
 		return
 	} else {
-			response := dto.CollectionResponse{
-			Id:     request.Collection_id,
+		response := dto.CollectionResponse{
+			Id:     request.Id,
 			Config: collection,
 		}
-		c.JSON(http.StatusOK,response)
+		c.JSON(http.StatusOK, response)
 	}
 
 }
