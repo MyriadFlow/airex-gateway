@@ -17,7 +17,7 @@ type CollectionRepositoryDb struct {
 }
 
 func (d CollectionRepositoryDb) AddCollection(c Collection, add []dto.Address) *errs.AppError {
-	collectionDb := d.client.Model(&Collection{})
+	collectionDb := d.client
 	err := collectionDb.Create(&c).Error
 	if err != nil {
 		logger.Error("Error While creating new account for collection " + err.Error())

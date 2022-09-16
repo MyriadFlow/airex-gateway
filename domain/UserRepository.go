@@ -17,7 +17,7 @@ func (i *UserRepositoryDb) Add(walletAddress string) error {
 	newUser := User{
 		WalletAddress: walletAddress,
 	}
-	err := db.Model(&newUser).Create(&newUser).Error
+	err := db.Create(&newUser).Error
 	return err
 }
 

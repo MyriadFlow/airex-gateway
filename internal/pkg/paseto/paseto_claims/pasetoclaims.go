@@ -24,7 +24,7 @@ func (c CustomClaims) Valid() error {
 	if err := c.RegisteredClaims.Valid(); err != nil {
 		return err
 	}
-	err := db.Model(&user.User{}).Where("wallet_address = ?", c.WalletAddress).First(&user.User{}).Error
+	err := db.Where("wallet_address = ?", c.WalletAddress).First(&user.User{}).Error
 	return err
 }
 
