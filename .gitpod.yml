@@ -8,7 +8,7 @@ tasks:
       PASETO_PRIVATE_KEY: abckey
       PASETO_EXPIRATION: 24h
       APP_PORT: 3000
-      AUTH_EULA: "Signing means you agress to T&C listed here"
+      AUTH_EULA: "Signing means you agree to T&C listed here"
       GIN_MODE: debug
       DB_HOST: localhost
       DB_USERNAME: airex_gateway

@@ -11,11 +11,15 @@ import (
 	"gorm.io/gorm"
 )
 
+type PasetoService struct {
+	DB *gorm.DB
+}
+
 // Returns paseto token for given wallet address
-func GetPasetoForUser(db *gorm.DB, walletAddr string) (string, error) {
+func (s *PasetoService) GetPasetoForUser(walletAddr string) (string, error) {
 	pasetoExpiration := envconfig.EnvVars.PASETO_EXPIRATION
 	signedBy := envconfig.EnvVars.SIGNED_BY
-	customClaims := pasetoclaims.New(db, walletAddr, pasetoExpiration, signedBy)
+	customClaims := pasetoclaims.New(s.DB, walletAddr, pasetoExpiration, signedBy)
 	privateKey := envconfig.EnvVars.PASETO_PRIVATE_KEY
 	symK := pvx.NewSymmetricKey([]byte(privateKey), pvx.Version4)
 	pv4 := pvx.NewPV4Local()
@@ -27,11 +31,12 @@ func GetPasetoForUser(db *gorm.DB, walletAddr string) (string, error) {
 	return tokenString, nil
 }
 
-func VerifyPaseto(pasetoToken string) error {
+func (s *PasetoService) VerifyPaseto(pasetoToken string) error {
 	pv4 := pvx.NewPV4Local()
 	k := envconfig.EnvVars.PASETO_PRIVATE_KEY
 	symK := pvx.NewSymmetricKey([]byte(k), pvx.Version4)
 	var cc pasetoclaims.CustomClaims
+	cc.Db = s.DB
 	err := pv4.
 		Decrypt(pasetoToken, symK).
 		ScanClaims(&cc)

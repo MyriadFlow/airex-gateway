@@ -1,20 +1,33 @@
-package app
+package flowid
 
 import (
 	"collection/config/envconfig"
+	"collection/domain"
 	"collection/dto/dtoapis"
 	"collection/logger"
-	"collection/service"
 	"net/http"
 
 	"github.com/TheLazarusNetwork/go-helpers/httpo"
 	"github.com/gin-gonic/gin"
 	"github.com/streamingfast/solana-go"
+	"gorm.io/gorm"
 	// "github.com/gorilla/mux"
 )
 
 type FlowIdHandler struct {
-	service service.DefaultFlowIdService
+	service DefaultFlowIdService
+}
+
+// ApplyRoutes applies router to gin Router
+func ApplyRoutes(dbClient *gorm.DB, r *gin.RouterGroup) {
+	flowIdRepo := domain.NewFlowIdRepositoryDb(dbClient)
+	userRepo := domain.NewUserRepositoryDb(dbClient)
+
+	flowIdHandler := FlowIdHandler{NewFlowIdService(flowIdRepo, userRepo)}
+	g := r.Group("/flowid")
+	{
+		g.GET("", flowIdHandler.GetFlowId)
+	}
 }
 
 func (u FlowIdHandler) GetFlowId(c *gin.Context) {

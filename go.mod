@@ -7,16 +7,12 @@ require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.8.1
-	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/uuid v1.3.0
-	github.com/gorilla/mux v1.8.0
-	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.7
 	github.com/streamingfast/solana-go v0.5.1
 	github.com/vk-rv/pvx v0.0.0-20210912195928-ac00bc32f6e7
 	go.uber.org/zap v1.23.0
-	gopkg.in/guregu/null.v4 v4.0.0
 	gorm.io/driver/postgres v1.3.9
 	gorm.io/gorm v1.23.8
 )

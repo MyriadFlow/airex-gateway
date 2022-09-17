@@ -2,7 +2,7 @@
 package pasetoclaims
 
 import (
-	"os/user"
+	"collection/dto"
 	"time"
 
 	"github.com/vk-rv/pvx"
@@ -24,7 +24,7 @@ func (c CustomClaims) Valid() error {
 	if err := c.RegisteredClaims.Valid(); err != nil {
 		return err
 	}
-	err := db.Where("wallet_address = ?", c.WalletAddress).First(&user.User{}).Error
+	err := db.Where("wallet_address = ?", c.WalletAddress).First(&dto.User{}).Error
 	return err
 }
 

@@ -2,6 +2,7 @@
 collection/
 # ignore  that file
 log.json
+*.log
 
 # Binaries for programs and plugins
 *.exe

@@ -23,6 +23,7 @@ type config struct {
 	ALLOWED_ORIGIN  []string `env:"ALLOWED_ORIGIN,required" envSeparator:","`
 	SIGNED_BY       string   `env:"SIGNED_BY,required"`
 	COLLECTION_PATH string   `env:"COLLECTION_PATH,required"`
+	NFT_STORAGE     string   `env:"NFT_STORAGE,required"`
 }
 
 var EnvVars config = config{}

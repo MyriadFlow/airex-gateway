@@ -57,3 +57,7 @@ func Fatal(message string, fields ...zap.Field) {
 func Fatalf(template string, args ...interface{}) {
 	log.Sugar().Fatalf(template, args...)
 }
+
+func Warnf(template string, args ...interface{}) {
+	log.Sugar().Warnf(template, args)
+}

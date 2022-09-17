@@ -7,11 +7,11 @@ import (
 
 	"gorm.io/gorm"
 
+	"collection/app/api"
 	"collection/config/envconfig"
 	"collection/domain"
 	"collection/dto"
 	"collection/logger"
-	"collection/service"
 
 	"gorm.io/driver/postgres"
 
@@ -29,17 +29,9 @@ func Start() {
 	dbClient := getDbClient()
 
 	//wiring
-	newCollectionRepositoryDb := domain.NewCollectionRepositoryDb(dbClient)
-	flowIdRepo := domain.NewFlowIdRepositoryDb(dbClient)
-	userRepo := domain.NewUserRepositoryDb(dbClient)
-	us := CollectionHandler{service.NewCollectionService(newCollectionRepositoryDb)}
 
-	flowIdHandler := FlowIdHandler{service.NewFlowIdService(flowIdRepo, userRepo)}
 	ginApp := gin.Default()
-	ginApp.POST("/collection", us.CreateCollection)
-	ginApp.GET("/flowid", flowIdHandler.GetFlowId)
-	ginApp.POST("/authenticate", flowIdHandler.Authenticate)
-
+	api.ApplyRoutes(dbClient, ginApp)
 	corsM := cors.New(cors.Config{AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowCredentials: false,
