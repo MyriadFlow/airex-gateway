@@ -1,5 +1,5 @@
 # ignore all file in collection
-collection/
+generated_collections/
 # ignore  that file
 log.json
 *.log
