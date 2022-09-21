@@ -1,52 +1,25 @@
 package collection
 
 import (
-	"collection/domain"
-	"collection/dto"
-	"net/http"
+	createcollection "collection/app/api/v1/collection/create"
+	deploycollection "collection/app/api/v1/collection/deploy"
+	uploadcollection "collection/app/api/v1/collection/upload"
+	"collection/app/middleware/pasetomiddleware"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
-	// "github.com/gorilla/mux"
 )
 
-type CollectionHandler struct {
-	service CollectionService
-}
-
-// ApplyRoutes applies router to gin Router
+// ApplyRoutes applies the /v1.0 group and all child routes to given gin RouterGroup
 func ApplyRoutes(dbClient *gorm.DB, r *gin.RouterGroup) {
-	collectionRepo := domain.NewCollectionRepositoryDb(dbClient)
-
-	collectionHandler := CollectionHandler{NewCollectionService(collectionRepo)}
-	g := r.Group("/collection")
+	collectionGrp := r.Group("/collection")
 	{
-		g.POST("", collectionHandler.CreateCollection)
-	}
-}
-
-func (u CollectionHandler) CreateCollection(c *gin.Context) {
-	var collection *dto.JsonFile
-	id := uuid.New()
-	var request dto.CollectionRequest
-
-	err := c.BindJSON(&request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, err.Error())
-		return
-	}
-	request.Id = id.String()
-	collection, appError := u.service.NewCollection(request)
-	if appError != nil {
-		c.JSON(appError.Code, appError.Message)
-		return
-	} else {
-		response := dto.CollectionResponse{
-			Id:     request.Id,
-			Config: collection,
+		pasetoMiddleWare := pasetomiddleware.PASETOMiddleWareService{
+			Db: dbClient,
 		}
-		c.JSON(http.StatusOK, response)
+		collectionGrp.Use(pasetoMiddleWare.PASETO)
+		createcollection.ApplyRoutes(dbClient, collectionGrp)
+		uploadcollection.ApplyRoutes(dbClient, collectionGrp)
+		deploycollection.ApplyRoutes(dbClient, collectionGrp)
 	}
-
 }

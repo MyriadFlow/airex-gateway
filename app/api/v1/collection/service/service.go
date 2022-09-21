@@ -1,4 +1,4 @@
-package collection
+package collectionservice
 
 import (
 	"bytes"
@@ -24,14 +24,17 @@ import (
 )
 
 type CollectionService interface {
-	NewCollection(dto.CollectionRequest) (*dto.JsonFile, *errs.AppError)
+	CreateCollection(string, dto.CollectionRequest) (*dto.JsonFile, *errs.AppError)
+	UploadCollection(walletAddr string, colId string) error
+	DeployCollection(walletAddr string, colId string) error
 }
 
 type DefaultCollectionService struct {
-	repo domain.CollectionRepositoryDb
+	repo     domain.CollectionRepositoryDb
+	userRepo domain.UserRepositoryDb
 }
 
-func (d DefaultCollectionService) NewCollection(req dto.CollectionRequest) (*dto.JsonFile, *errs.AppError) {
+func (d DefaultCollectionService) CreateCollection(creatorWallerAddress string, req dto.CollectionRequest) (*dto.JsonFile, *errs.AppError) {
 	appErr := req.ToValidate()
 	if appErr != nil {
 		return nil, appErr
@@ -50,7 +53,7 @@ func (d DefaultCollectionService) NewCollection(req dto.CollectionRequest) (*dto
 	}
 
 	seller := req.Seller
-	d.repo.AddCollection(a, seller)
+	d.repo.AddCollection(creatorWallerAddress, a, seller)
 
 	//Asset File Making by id
 	var firstAddress string
@@ -148,24 +151,21 @@ func (d DefaultCollectionService) NewCollection(req dto.CollectionRequest) (*dto
 		dto.Save(imgPath, dec)
 
 	}
-	configFile := path.Join(filepath, "config.json")
-	cacheFile := path.Join(filepath, "cache.json")
-	//TODO handle error
-	go SugarUploadAndDeploy(configFile, cacheFile, assetsFilePath)
 
 	return c, appErr
 }
 
-func SugarUploadAndDeploy(configFile string, cacheFile string, assetsFilePath string) {
-	err := SugarUpload(configFile, cacheFile, assetsFilePath)
+func (d DefaultCollectionService) UploadCollection(walletAddr string, collectionId string) error {
+	_, err := d.userRepo.GetCollection(walletAddr, collectionId)
 	if err != nil {
-		logger.Errorf("failed to upload using sugar :%s", err)
-		return
+		return err
 	}
-	SugarDeploy(configFile, cacheFile)
-}
-
-func SugarUpload(configFile string, cacheFile string, assetsFilePath string) error {
+	assetPath := envconfig.EnvVars.COLLECTION_PATH
+	filename := collectionId
+	filepath := assetPath + "/" + filename
+	configFile := path.Join(filepath, "config.json")
+	cacheFile := path.Join(filepath, "cache.json")
+	assetsFilePath := filepath + "/" + "assets"
 	var stderr bytes.Buffer
 	cmd := exec.Command("sugar", "upload", "--config", configFile, "--cache", cacheFile, assetsFilePath)
 	cmd.Stderr = &stderr
@@ -177,7 +177,16 @@ func SugarUpload(configFile string, cacheFile string, assetsFilePath string) err
 	return nil
 }
 
-func SugarDeploy(configFile string, cacheFile string) error {
+func (d DefaultCollectionService) DeployCollection(walletAddr string, collectionId string) error {
+	_, err := d.userRepo.GetCollection(walletAddr, collectionId)
+	if err != nil {
+		return err
+	}
+	assetPath := envconfig.EnvVars.COLLECTION_PATH
+	filename := collectionId
+	filepath := assetPath + "/" + filename
+	configFile := path.Join(filepath, "config.json")
+	cacheFile := path.Join(filepath, "cache.json")
 	var stderr bytes.Buffer
 	cmd := exec.Command("sugar", "deploy", "--config", configFile, "--cache", cacheFile)
 	cmd.Stderr = &stderr
@@ -188,6 +197,6 @@ func SugarDeploy(configFile string, cacheFile string) error {
 	}
 	return nil
 }
-func NewCollectionService(repository domain.CollectionRepositoryDb) DefaultCollectionService {
-	return DefaultCollectionService{repository}
+func NewCollectionService(collectionRepo domain.CollectionRepositoryDb, userRepo domain.UserRepositoryDb) DefaultCollectionService {
+	return DefaultCollectionService{collectionRepo, userRepo}
 }

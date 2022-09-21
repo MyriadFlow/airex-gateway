@@ -16,8 +16,9 @@ type CollectionRepositoryDb struct {
 	client *gorm.DB
 }
 
-func (d CollectionRepositoryDb) AddCollection(c Collection, add []dto.Address) *errs.AppError {
+func (d CollectionRepositoryDb) AddCollection(creatorWalletAddr string, c Collection, add []dto.Address) *errs.AppError {
 	collectionDb := d.client
+	c.CreatorWalletAddress = creatorWalletAddr
 	err := collectionDb.Create(&c).Error
 	if err != nil {
 		logger.Error("Error While creating new account for collection " + err.Error())

@@ -16,6 +16,9 @@ import (
 )
 
 var (
+	GinContextWalletAddress = "walletAddress"
+)
+var (
 	ErrAuthHeaderMissing = errors.New("authorization header is required")
 )
 
@@ -41,7 +44,7 @@ func (s *PASETOMiddleWareService) PASETO(c *gin.Context) {
 	pasetoService := paseto.PasetoService{
 		DB: s.Db,
 	}
-	err = pasetoService.VerifyPaseto(headers.Authorization)
+	claims, err := pasetoService.VerifyPaseto(headers.Authorization)
 	if err != nil {
 		var validationErr *pvx.ValidationError
 		if errors.As(err, &validationErr) {
@@ -63,6 +66,8 @@ func (s *PASETOMiddleWareService) PASETO(c *gin.Context) {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
+
+	c.Set(GinContextWalletAddress, claims.WalletAddress)
 }
 
 func logValidationFailed(token string, err error) {

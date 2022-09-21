@@ -4,7 +4,6 @@ import (
 	"collection/app/api/v1/authenticate"
 	"collection/app/api/v1/collection"
 	"collection/app/api/v1/flowid"
-	"collection/app/middleware/pasetomiddleware"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -16,10 +15,7 @@ func ApplyRoutes(dbClient *gorm.DB, r *gin.RouterGroup) {
 	{
 		flowid.ApplyRoutes(dbClient, v1)
 		authenticate.ApplyRoutes(dbClient, v1)
-		pasetoMiddleWare := pasetomiddleware.PASETOMiddleWareService{
-			Db: dbClient,
-		}
-		v1.Use(pasetoMiddleWare.PASETO)
+
 		collection.ApplyRoutes(dbClient, v1)
 	}
 }

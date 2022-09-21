@@ -31,7 +31,7 @@ func (s *PasetoService) GetPasetoForUser(walletAddr string) (string, error) {
 	return tokenString, nil
 }
 
-func (s *PasetoService) VerifyPaseto(pasetoToken string) error {
+func (s *PasetoService) VerifyPaseto(pasetoToken string) (*pasetoclaims.CustomClaims, error) {
 	pv4 := pvx.NewPV4Local()
 	k := envconfig.EnvVars.PASETO_PRIVATE_KEY
 	symK := pvx.NewSymmetricKey([]byte(k), pvx.Version4)
@@ -42,7 +42,7 @@ func (s *PasetoService) VerifyPaseto(pasetoToken string) error {
 		ScanClaims(&cc)
 	if err != nil {
 		err = fmt.Errorf("failed to scan claims: %w", err)
-		return err
+		return nil, err
 	}
-	return nil
+	return &cc, nil
 }
